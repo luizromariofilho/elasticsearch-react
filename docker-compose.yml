@@ -1,0 +1,49 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres
+    container_name: elasticsearch_react_database
+    volumes:
+      - ./tmp/data/postgres:/var/lib/postgresql/data
+      - ./.docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - '.env'
+    networks:
+      - backend
+
+  api:
+    image: elasticsearch_react/api
+    build:
+      context: .
+      dockerfile: ./.docker/Dockerfile
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec puma -C config/puma.rb"
+    container_name: elasticsearch_react_api
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - backend  
+    env_file:
+      - '.env'
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.3
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      discovery.type: single-node
+    volumes:
+      - ./tmp/data/elasticsearch:/usr/share/elasticsearch/data
+
+volumes:
+  postgres:
+  elasticsearch:
+  elasticsearch_react_api:
+networks:
+  backend:
