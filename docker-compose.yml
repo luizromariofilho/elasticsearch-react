@@ -26,13 +26,14 @@ services:
       - "3000:3000"
     depends_on:
       - postgres
+      - elasticsearch
     networks:
       - backend  
     env_file:
       - '.env'
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.3
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
     ports:
       - 9200:9200
       - 9300:9300
@@ -40,6 +41,8 @@ services:
       discovery.type: single-node
     volumes:
       - ./tmp/data/elasticsearch:/usr/share/elasticsearch/data
+    networks:
+      - backend
 
 volumes:
   postgres:

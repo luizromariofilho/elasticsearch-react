@@ -14,6 +14,19 @@ class SongsController < ApplicationController
     }
   end
 
+  # GET /songs/search
+  # GET /songs/search.json
+  def search
+    query = Song.search(searching_params)
+    @songs = query.page(params[:page])
+    render json: {
+      result: @songs,
+      number_pages: (query.count / WillPaginate.per_page.to_f).ceil,
+      count: @songs.length,
+      total: query.count
+    }
+  end
+
   # GET /songs/1
   # GET /songs/1.json
   def show; end
@@ -60,5 +73,9 @@ class SongsController < ApplicationController
 
   def filtering_params
     params.slice(:title, :artist)
+  end
+
+  def searching_params
+    params[:query]
   end
 end
